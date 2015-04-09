@@ -7,7 +7,7 @@ Wants=docker.service
 
 [Service]
 ExecStart=/opt/kubernetes/kube-proxy \
---master={{ salt['pillar.get']('kube_master:kubmasta:ipaddress') }}:8080 \
+--master={{ salt['pillar.get']('kube_master:ipaddress') }}:8080 \
 --logtostderr=true
 Restart=on-failure
 RestartSec=5

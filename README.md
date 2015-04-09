@@ -1,9 +1,12 @@
 #SaltStack for bare metal Kubernetes
 
-This is the repo I'll be using to track my salt-stack implementation of Kubernetes on bare metal.  If you're going to use this code, keep in mind that all of the salt config is based off of my lab layout as shown below...
+This is my first go at a templated config for a bare metal Kubernetes installation.  In theory, you should only need to meet the follow prereqs and make the following changes to use these scripts for your own build...
 
-![Alt text](http://www.dasblinkenlichten.com/wp-content/uploads/2015/03/image.png)
+Prereqs
+-Have salt already up and running
+-Use the word 'master' and 'minion' in your server naming configuration.  If you don't you'll need to edit the salt/top.sls to make sure the right state files match the right servers
 
-The lab has 1 server (kubbuild) that I use for building the Kubernetes binaries and also acts as the salt-master.  The remaining 5 servers (kubmasta, kubminion[1-4]) are the actual Kubernetes cluster and all act as salt-minions.  That being said, for the Salt config to work your servers have to have the same IP addresses and DNS names that I use in my lab.  
+Changes you need to make
+-Update the pillar data file kube_data.sls with your relevant info
 
-I'll be updating this as I refine my Salt config and build on the Kubernetes components.
+Comments welcome!

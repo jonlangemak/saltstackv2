@@ -1,6 +1,5 @@
 kube_master:
-  kubmasta: 
-    ipaddress: 10.20.30.61
+  ipaddress: 10.20.30.61
   portal_net: 10.100.0.0/16
   
 kube_minions:
