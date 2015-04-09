@@ -1,0 +1,16 @@
+[Unit]
+Description=Kubernetes proxy server
+After=etcd.service
+After=docker.service
+Wants=etcd.service
+Wants=docker.service
+
+[Service]
+ExecStart=/opt/kubernetes/kube-proxy \
+--master={{ salt['pillar.get']('kube_master:kubmasta:ipaddress') }}:8080 \
+--logtostderr=true
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

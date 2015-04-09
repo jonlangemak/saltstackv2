@@ -1,0 +1,22 @@
+[Unit]
+Description=Kubernetes Kubelet
+After=etcd.service
+After=docker.service
+Wants=etcd.service
+Wants=docker.service
+
+[Service]
+ExecStart=/opt/kubernetes/kubelet \
+--address={{ salt['pillar.get']('kube_minions:' ~ grains['host'] ~ ':ipaddress') }} \
+--port=10250 \
+--hostname_override={{ salt['grains.get']('host') }} \
+--api_servers={{ salt['pillar.get']('kube_master:kubmasta:ipaddress') }}:8080 \
+--cluster_dns={{ salt['pillar.get']('kube_pods:skydns:portalip') }} \
+--cluster_domain={{ salt['pillar.get']('kube_pods:skydns:dnsname') }} \
+--config=/etc/kubernetes/manifests \
+--logtostderr=true
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

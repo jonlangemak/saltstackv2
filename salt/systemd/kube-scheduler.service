@@ -1,0 +1,14 @@
+[Unit]
+Description=Kubernetes Scheduler
+After=etcd.service
+After=apiserver.service
+Wants=etcd.service
+Wants=apiserver.service
+
+[Service]
+ExecStart=/opt/kubernetes/kube-scheduler --master=127.0.0.1:8080
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
