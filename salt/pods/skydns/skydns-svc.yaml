@@ -4,7 +4,7 @@ id: kube-dns
 namespace: default
 protocol: UDP
 port: 53
-portalIP: {{ salt['pillar.get']('kube_data:kube_pods:skydns:portalip') }}
+portalIP: {{ salt['pillar.get']('kube_pods:skydns:portalip') }}
 containerPort: 53
 labels:
   k8s-app: kube-dns

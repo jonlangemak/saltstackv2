@@ -10,6 +10,7 @@
   file:
     - managed
     - source: salt://pods/skydns/skydns-svc.yaml
+    - template: jinja
     - user: root
     - group: root
     - mode: 755
@@ -78,14 +79,6 @@ skydns-rc:
     - group: root
     - mode: 755
 
-/root/heapster/influxdb-ui-svc.yaml:
-  file:
-    - managed
-    - source: salt://pods/heapster/influxdb-ui-svc.yaml
-    - user: root
-    - group: root
-    - mode: 755
-
 grafana-svc:
   cmd.run:
     - name: kubectl create -f /root/heapster/grafana-svc.yaml
@@ -97,10 +90,6 @@ heapster-svc:
 influxdb-svc:
   cmd.run:
     - name: kubectl create -f /root/heapster/influxdb-svc.yaml
-
-influxdb-ui-svc:
-  cmd.run:
-    - name: kubectl create -f /root/heapster/influxdb-ui-svc.yaml
 
 heapster-rc:
   cmd.run:
