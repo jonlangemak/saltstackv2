@@ -7,7 +7,7 @@ base:
     - baseinstall
   '*minion*':
     - minioninstall
-  '*master*':
+  '*masta*':
     - masterinstall
     - pods
 

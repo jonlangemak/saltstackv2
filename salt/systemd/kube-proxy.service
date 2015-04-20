@@ -1,3 +1,7 @@
+{% set master = [] -%}
+{% for node in salt['pillar.get']('kube_nodes', {}) -%} 
+    {% do master.append(salt['pillar.get']('kube_nodes:' ~ node ~ ':ipaddress')) if salt['pillar.get']('kube_nodes:' ~ node ~ ':type') in "master" -%}
+{% endfor %}
 [Unit]
 Description=Kubernetes proxy server
 After=etcd.service
@@ -7,7 +11,7 @@ Wants=docker.service
 
 [Service]
 ExecStart=/opt/kubernetes/kube-proxy \
---master={{ salt['pillar.get']('kube_master:ipaddress') }}:8080 \
+--master={{ master | join(',') }}:8080 \
 --logtostderr=true
 Restart=on-failure
 RestartSec=5

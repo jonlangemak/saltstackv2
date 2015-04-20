@@ -1,31 +1,43 @@
-#Download etcd
-etcd-install:
-  archive.extracted:
-    - name: /opt/
-    - source: https://github.com/coreos/etcd/releases/download/v2.0.5/etcd-v2.0.5-linux-amd64.tar.gz
-    - source_hash: md5=4d8ccff28c383980b52397a7664b3342
-    - archive_format: tar
-    - user: root
-    - group: root
-    - if_missing: /opt/etcd-v2.0.5-linux-amd64/
-
-#Make symlink for etcdctl
-/usr/local/bin/etcdctl:
-  file.symlink:
-    - target: /opt/etcd-v2.0.5-linux-amd64/etcdctl
-
-/usr/lib/systemd/system/etcd.service:
-  file:
-    - managed
-    - source: salt://systemd/etcd.service
+#Pull down docker config file 
+/etc/sysconfig/docker:
+  file.managed:
+    - source: salt://configfiles/docker
+    - template: jinja
     - user: root
     - group: root
     - mode: 755
 
-etcd:
+#Install docker, enable it, and run it
+docker:
+  pkg:
+    - installed
   service:
     - running
+    - watch:
+      - file: /etc/sysconfig/docker
     - enable: true
+
+#Setup and copy down the manifests
+/etc/kubernetes:
+  file.directory:
+    - user: root
+    - group: root
+    - dir_mode: 755
+    - file_mode: 755
+
+/etc/kubernetes/manifests:
+  file.directory:
+    - user: root
+    - group: root
+    - dir_mode: 755
+    - file_mode: 755
+
+/etc/kubernetes/manifests/etcd.yaml:
+  file.managed:
+    - source: salt://manifests/etcd.yaml
+    - user: root
+    - group: root
+    - mode: 755
 
 #Make the kubernetes binary directory
 /opt/kubernetes:
@@ -69,6 +81,13 @@ etcd:
     - group: root
     - mode: 755
 
+/opt/kubernetes/kubelet:
+  file:
+    - managed
+    - source: salt://kubebinaries/kubelet
+    - user: root
+    - group: root
+    - mode: 755
 
 #Pull down Systemd Service definitions
 /usr/lib/systemd/system/kube-apiserver.service:
@@ -97,6 +116,15 @@ etcd:
     - group: root
     - mode: 755
 
+/usr/lib/systemd/system/kube-kubelet.service:
+  file:
+    - managed
+    - source: salt://systemd/kube-kubelet.service
+    - template: jinja
+    - user: root
+    - group: root
+    - mode: 755
+
 #Start Kubernetes services
 kube-apiserver:
   service:
@@ -114,6 +142,14 @@ kube-scheduler:
   service:
     - running
     - enable: true
+
+kube-kubelet:
+  service:
+    - running
+    - enable: true
+    - watch:
+      - file: /etc/kubernetes/manifests/*
+
 
 #Make symlink for kubectl
 /usr/local/bin/kubectl:

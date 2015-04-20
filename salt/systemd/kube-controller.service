@@ -1,3 +1,7 @@
+{% set machinelist = [] -%}
+{% for node in salt['pillar.get']('kube_nodes', {}) -%} 
+    {% do machinelist.append(node) if salt['pillar.get']('kube_nodes:' ~ node ~ ':type') not in "master" -%}
+{% endfor %}
 [Unit]
 Description=Kubernetes Controller Manager
 After=etcd.service
@@ -8,7 +12,7 @@ Wants=apiserver.service
 [Service]
 ExecStart=/opt/kubernetes/kube-controller-manager \
 --master=http://127.0.0.1:8080 \
---machines={{ pillar.get('kube_minions')|join(',') }}
+--machines={{ machinelist | join(',') }}
 Restart=on-failure
 RestartSec=5
 

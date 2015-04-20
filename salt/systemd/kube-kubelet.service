@@ -1,3 +1,7 @@
+{% set master = [] -%}
+{% for node in salt['pillar.get']('kube_nodes', {}) -%} 
+    {% do master.append(salt['pillar.get']('kube_nodes:' ~ node ~ ':ipaddress')) if salt['pillar.get']('kube_nodes:' ~ node ~ ':type') in "master" -%}
+{% endfor %}
 [Unit]
 Description=Kubernetes Kubelet
 After=etcd.service
@@ -7,10 +11,10 @@ Wants=docker.service
 
 [Service]
 ExecStart=/opt/kubernetes/kubelet \
---address={{ salt['pillar.get']('kube_minions:' ~ grains['host'] ~ ':ipaddress') }} \
+--address={{ salt['pillar.get']('kube_nodes:' ~ grains['host'] ~ ':ipaddress') }} \
 --port=10250 \
 --hostname_override={{ salt['grains.get']('host') }} \
---api_servers={{ salt['pillar.get']('kube_master:ipaddress') }}:8080 \
+--api_servers={{ master | join(',') }}:8080 \
 --cluster_dns={{ salt['pillar.get']('kube_pods:skydns:portalip') }} \
 --cluster_domain={{ salt['pillar.get']('kube_pods:skydns:dnsname') }} \
 --config=/etc/kubernetes/manifests \
