@@ -7,6 +7,7 @@ This is my attempt at installing and configuring a working Kubernetes cluster on
 - Have a working SaltStack cluster
 - Clone this code onto one of your servers (git clone https://github.com/jonlangemak/saltstackv2.git /srv/)
 - Update the pillar file (/srv/pillar/kube_data.sls) to match your setup
+- Copy the Kubernetes binaries into the salt director (/srv/salt/kubebinaries)
 - Push the Salt Stack config to all of your servers defined in the pillar (salt '*' state.highstate)
 - Optionally deploy the cluster add-on pods to get SkyDNS, Heapster, and Fluentd Logging (salt '<your Kubernetes master> states.sls pods
 
