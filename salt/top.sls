@@ -1,13 +1,8 @@
-# This file assumes that you use the words 'master' and 'minion' in your 
-# naming convention for your nodes.  If thats not the case, you'll need
-# to update these so the proper state files match the proper servers
-
 base:
   '*':
     - baseinstall
-  '*minion*':
+{% if 'minion' in salt['pillar.get']('kube_nodes:' ~ grains['host'] ~ ':type') %}
     - minioninstall
-  '*masta*':
+{% elif 'master' in salt['pillar.get']('kube_nodes:' ~ grains['host'] ~ ':type') %}
     - masterinstall
-    - pods
-
+{% endif %}

@@ -1,22 +1,3 @@
-#Pull down docker config file 
-/etc/sysconfig/docker:
-  file.managed:
-    - source: salt://configfiles/docker
-    - template: jinja
-    - user: root
-    - group: root
-    - mode: 755
-
-#Install docker, enable it, and run it
-docker:
-  pkg:
-    - installed
-  service:
-    - running
-    - watch:
-      - file: /etc/sysconfig/docker
-    - enable: true
-
 #Make the kubernetes binary directory
 /opt/kubernetes:
   file.directory:
