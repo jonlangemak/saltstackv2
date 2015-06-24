@@ -4,9 +4,7 @@
 {% endfor %}
 [Unit]
 Description=Kubernetes Kubelet
-After=etcd.service
 After=docker.service
-Wants=etcd.service
 Wants=docker.service
 
 [Service]
@@ -18,6 +16,11 @@ ExecStart=/opt/kubernetes/kubelet \
 --cluster_dns={{ salt['pillar.get']('kube_pods:skydns:portalip') }} \
 --cluster_domain={{ salt['pillar.get']('kube_pods:skydns:dnsname') }} \
 --config=/etc/kubernetes/manifests \
+{% if salt['pillar.get']('kube_nodes:' ~grains['host'] ~':type') in "minion" -%}
+--register-node=true \
+{% else -%}
+--register-node=false \
+{% endif -%}
 --logtostderr=true
 Restart=on-failure
 RestartSec=5

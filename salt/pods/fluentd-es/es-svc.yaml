@@ -1,10 +1,16 @@
-apiVersion: v1beta1
+piVersion: v1beta3
 kind: Service
-id: elasticsearch-logging
-port: 9200
-containerPort: 9200
-labels:
+metadata:
   name: elasticsearch-logging
-  kubernetes.io/cluster-service: "true"
-selector:
-  name: elasticsearch-logging
+  namespace: default
+  labels:
+    k8s-app: elasticsearch-logging
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "Elasticsearch"
+spec:
+  ports:
+  - port: 9200
+    protocol: TCP
+    targetPort: es-port
+  selector:
+    k8s-app: elasticsearch-logging

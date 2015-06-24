@@ -1,7 +1,7 @@
 # /etc/sysconfig/docker
 
 $# Modify these options if you want to change the way the docker daemon runs
-OPTIONS=--selinux-enabled --bip={{ salt['pillar.get']('kube_nodes:' ~ grains['host'] ~ ':docker0_bip') }}{{ salt['pillar.get']('kube_nodes:' ~ grains['host'] ~ ':docker0_mask') }} --iptables=false --ip-masq=false
+OPTIONS=--bip={{ salt['pillar.get']('kube_nodes:' ~ grains['host'] ~ ':docker0_bip') }}{{ salt['pillar.get']('kube_nodes:' ~ grains['host'] ~ ':docker0_mask') }} --iptables=false --ip-masq=false
 
 # Location used for temporary files, such as those created by
 # docker load and build operations. Default is /var/lib/docker/tmp

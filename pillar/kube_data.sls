@@ -27,5 +27,5 @@ kube_nodes:
     portal_net: 10.100.0.0/16
 kube_pods:
   skydns:
-    portalip: 10.100.0.10
+    portalip: 10.0.0.10
     dnsname: kubdomain.local

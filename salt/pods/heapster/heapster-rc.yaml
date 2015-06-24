@@ -1,38 +1,50 @@
-apiVersion: v1beta1
-id: monitoring-heapster-controller
+apiVersion: v1beta3
 kind: ReplicationController
-desiredState:
-  replicas: 1
-  replicaSelector:
+metadata: 
+  labels: 
     name: heapster
-  podTemplate:
-    desiredState:
-      manifest:
-        version: v1beta1
-        id: monitoring-heapster
-        containers:
-          - name: heapster
-            image: gcr.io/google_containers/heapster:v0.10.0
-            env:
-              - name: "INFLUXDB_HOST"
-                value: "monitoring-influxdb"
-              - name: "SINK"
-                value: "influxdb"
-              - name: "FLAGS"
-                value: "--kubelet_port=10255"
-            volumeMounts:
-              - name: ssl-certs
-                mountPath: /etc/ssl/certs
-                readOnly: true
-        volumes:
-          - name: ssl-certs
-            source:
-              hostDir:
-                path: /etc/ssl/certs
-    labels:
-      name: heapster
-      uses: monitoring-influxdb
-      kubernetes.io/cluster-service: "true"
-labels:
-  name: heapster
-  kubernetes.io/cluster-service: "true"
+    kubernetes.io/cluster-service: "true"
+  name: monitoring-heapster-controller
+spec: 
+  replicas: 1
+  selector: 
+    name: heapster
+  template: 
+    metadata: 
+      labels: 
+        name: heapster
+        kubernetes.io/cluster-service: "true"
+    spec: 
+      containers: 
+        - image: gcr.io/google_containers/heapster:v0.12.1
+          name: heapster
+          command:
+            - /heapster
+            - --source=kubernetes:http://kubernetes-ro
+            - --sink=influxdb:http://monitoring-influxdb:8086
+          volumeMounts: 
+            - name: ssl-certs
+              mountPath: /etc/ssl/certs
+              readOnly: true
+            - name: ssl-pem
+              mountPath: /etc/pki/ca-trust/extracted/pem
+              readOnly: true
+            - name: ssl-openssl
+              mountPath: /etc/pki/ca-trust/extracted/openssl
+              readOnly: true
+            - name: monitoring-token
+              mountPath: /etc/kubernetes/kubeconfig
+              readOnly: true
+      volumes: 
+        - name: ssl-pem
+          hostPath:
+            path: "/etc/pki/ca-trust/extracted/pem"
+        - name: ssl-openssl
+          hostPath:
+            path: "/etc/pki/ca-trust/extracted/openssl"
+        - name: ssl-certs
+          hostPath: 
+            path: "/etc/ssl/certs"
+        - name: monitoring-token
+          secret:
+            secretName: token-system-monitoring

@@ -1,4 +1,3 @@
-#Pull down docker config file 
 #Setup and copy down the manifests
 /etc/kubernetes:
   file.directory:
@@ -13,6 +12,13 @@
     - group: root
     - dir_mode: 755
     - file_mode: 755
+
+/etc/kubernetes/manifests/master-services.yaml:
+  file.managed:
+    - source: salt://manifests/master-services.yaml
+    - user: root
+    - group: root
+    - mode: 755
 
 /etc/kubernetes/manifests/etcd.yaml:
   file.managed:
@@ -33,32 +39,8 @@
 /opt/kubernetes/kubectl:
   file:
     - managed
-    - source: salt://kubebinaries/kubectl
-    - user: root
-    - group: root
-    - mode: 755
-
-/opt/kubernetes/kube-apiserver:
-  file:
-    - managed
-    - source: salt://kubebinaries/kube-apiserver
-    - user: root
-    - group: root
-    - mode: 755
-
-/opt/kubernetes/kube-controller-manager:
-  file:
-    - managed
-    - source: salt://kubebinaries/kube-controller-manager
-    - user: root
-    - group: root
-    - mode: 755
-
-/opt/kubernetes/kube-scheduler:
-  file:
-    - managed
-    - source: salt://kubebinaries/kube-scheduler
-    - template: jinja
+    - source: http://storage.googleapis.com/kubernetes-release/release/v0.18.2/bin/linux/amd64/kubectl
+    - source_hash: md5=e658537f2c033b472f5e7ac8b239c2b1
     - user: root
     - group: root
     - mode: 755
@@ -72,32 +54,6 @@
     - mode: 755
 
 #Pull down Systemd Service definitions
-/usr/lib/systemd/system/kube-apiserver.service:
-  file:
-    - managed
-    - source: salt://systemd/kube-apiserver.service
-    - template: jinja
-    - user: root
-    - group: root
-    - mode: 755
-
-/usr/lib/systemd/system/kube-controller.service:
-  file:
-    - managed
-    - source: salt://systemd/kube-controller.service
-    - template: jinja
-    - user: root
-    - group: root
-    - mode: 755
-
-/usr/lib/systemd/system/kube-scheduler.service:
-  file:
-    - managed
-    - source: salt://systemd/kube-scheduler.service
-    - user: root
-    - group: root
-    - mode: 755
-
 /usr/lib/systemd/system/kube-kubelet.service:
   file:
     - managed
@@ -108,23 +64,6 @@
     - mode: 755
 
 #Start Kubernetes services
-kube-apiserver:
-  service:
-    - running
-    - enable: true
-    - watch:
-      - file: /usr/lib/systemd/system/kube-apiserver.service
-
-kube-controller:
-  service:
-    - running
-    - enable: true
-
-kube-scheduler:
-  service:
-    - running
-    - enable: true
-
 kube-kubelet:
   service:
     - running
@@ -132,8 +71,9 @@ kube-kubelet:
     - watch:
       - file: /etc/kubernetes/manifests/*
 
-
 #Make symlink for kubectl
 /usr/local/bin/kubectl:
   file.symlink:
     - target: /opt/kubernetes/kubectl
+
+

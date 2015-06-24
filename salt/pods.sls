@@ -19,9 +19,22 @@
   file:
     - managed
     - source: salt://pods/skydns/skydns-rc.yaml
+    - template: jinja
     - user: root
     - group: root
     - mode: 755
+
+/root/skydns/token-system-dns.json:
+  file:
+    - managed
+    - source: salt://pods/skydns/token-system-dns.json
+    - user: root
+    - group: root
+    - mode: 755
+
+token-dns:
+  cmd.run:
+    - name: kubectl create -f /root/skydns/token-system-dns.json
 
 skydns-service:
   cmd.run:
@@ -78,6 +91,18 @@ skydns-rc:
     - user: root
     - group: root
     - mode: 755
+
+/root/heapster/token-system-monitoring.json:
+  file:
+    - managed
+    - source: salt://pods/heapster/token-system-monitoring.json
+    - user: root
+    - group: root
+    - mode: 755
+
+toekn-monitoring:
+  cmd.run:
+    - name: kubectl create -f /root/heapster/token-system-monitoring.json
 
 grafana-svc:
   cmd.run:
@@ -138,6 +163,18 @@ influxdb-grafana-rc:
     - user: root
     - group: root
     - mode: 755
+
+/root/fluentd-es/token-system-logging.json:
+  file:
+    - managed
+    - source: salt://pods/fluentd-es/token-system-logging.json
+    - user: root
+    - group: root
+    - mode: 755
+
+token-logging:
+  cmd.run:
+    - name: kubectl create -f /root/fluentd-es/token-system-logging.json
 
 es-service:
   cmd.run:

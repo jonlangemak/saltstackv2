@@ -1,29 +1,31 @@
-apiVersion: v1beta1
-kind:  ReplicationController
-id: kibana-logging-controller
-desiredState:
+apiVersion: v1beta3
+kind: ReplicationController
+metadata:
+  name: kibana-logging-v1
+  namespace: default
+  labels:
+    k8s-app: kibana-logging
+    version: v1
+    kubernetes.io/cluster-service: "true"
+spec:
   replicas: 1
-  replicaSelector:
-    name: kibana-logging
-  podTemplate:
-    desiredState:
-      manifest:
-        version: v1beta1
-        id: kibana-viewer
-        containers:
-          - name: kibana-logging
-            image: gcr.io/google_containers/kibana:1.2
-            env:
-              - name: "ES_SCHEME"
-                value: "http"
-              - name: "ES_HOST"
-                value: "\"+window.location.hostname+\":8080/api/v1beta1/proxy/services/elasticsearch-logging"
-            ports:
-              - name: kibana-port
-                containerPort: 80
-    labels:
-      name: kibana-logging
-      kubernetes.io/cluster-service: "true"
-labels:
-  name: kibana-logging
-  kubernetes.io/cluster-service: "true"
+  selector:
+    k8s-app: kibana-logging
+    version: v1
+  template:
+    metadata:
+      labels:
+        k8s-app: kibana-logging
+        version: v1
+        kubernetes.io/cluster-service: "true"
+    spec:
+      containers:
+      - name: kibana-logging
+        image: gcr.io/google_containers/kibana:1.3
+        env:
+          - name: "ELASTICSEARCH_URL"
+            value: "http://elasticsearch-logging:9200"
+        ports:
+        - containerPort: 5601
+          name: kibana-port
+          protocol: TCP

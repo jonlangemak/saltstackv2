@@ -1,33 +1,43 @@
-apiVersion: v1beta1
+apiVersion: v1beta3
 kind: ReplicationController
-id: elasticsearch-logging-controller
-desiredState:
+metadata:
+  name: elasticsearch-logging-v1
+  namespace: default
+  labels:
+    k8s-app: elasticsearch-logging
+    version: v1
+    kubernetes.io/cluster-service: "true"
+spec:
   replicas: 1
-  replicaSelector:
-    name: elasticsearch-logging
-  podTemplate:
-    desiredState:
-      manifest:
-        version: v1beta1
-        id: es-log-ingestion
-        containers:
-          - name: elasticsearch-logging
-            image: gcr.io/google_containers/elasticsearch:1.0
-            ports:
-              - name: es-port
-                containerPort: 9200
-              - name: es-transport-port
-                containerPort: 9300
-            volumeMounts:
-              - name: es-persistent-storage
-                mountPath: /data
-        volumes:
-          - name: es-persistent-storage
-            source:
-              emptyDir: {}
-    labels:
-      name: elasticsearch-logging
-      kubernetes.io/cluster-service: "true"
-labels:
-  name: elasticsearch-logging
-  kubernetes.io/cluster-service: "true"
+  selector:
+    k8s-app: elasticsearch-logging
+    version: v1
+  template:
+    metadata:
+      labels:
+        k8s-app: elasticsearch-logging
+        version: v1
+        kubernetes.io/cluster-service: "true"
+    spec:
+      containers:
+      - image: gcr.io/google_containers/elasticsearch:1.3
+        name: elasticsearch-logging
+        ports:
+        - containerPort: 9200
+          name: es-port
+          protocol: TCP
+        - containerPort: 9300
+          name: es-transport-port
+          protocol: TCP
+        volumeMounts:
+        - name: token-system-logging
+          mountPath: /etc/token-system-logging
+          readOnly: true
+        - name: es-persistent-storage
+          mountPath: /data
+      volumes:
+      - name: token-system-logging
+        secret:
+          secretName: token-system-logging
+      - name: es-persistent-storage
+        emptyDir: {}
