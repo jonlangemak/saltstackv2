@@ -5,5 +5,4 @@ base:
     - minioninstall
 {% elif 'master' in salt['pillar.get']('kube_nodes:' ~ grains['host'] ~ ':type') %}
     - masterinstall
-    - pods
 {% endif %}

@@ -13,6 +13,7 @@ ExecStart=/opt/kubernetes/kubelet \
 --port=10250 \
 --hostname_override={{ salt['grains.get']('host') }} \
 --api_servers={{ master | join(',') }}:8080 \
+--config=/etc/kubernetes/manifests \
 --cluster_dns={{ salt['pillar.get']('kube_pods:skydns:portalip') }} \
 --cluster_domain={{ salt['pillar.get']('kube_pods:skydns:dnsname') }} \
 --config=/etc/kubernetes/manifests \

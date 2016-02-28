@@ -1,30 +1,20 @@
 kube_nodes:
-  kubminion1:
-    type: minion
-    ipaddress: 10.20.30.62
-    docker0_bip: 10.10.10.1
-    docker0_mask: /24
-  kubminion2:
-    type: minion
-    ipaddress: 10.20.30.63
-    docker0_bip: 10.10.20.1
-    docker0_mask: /24
-  kubminion3:
-    type: minion
-    ipaddress: 192.168.10.64
-    docker0_bip: 10.10.30.1
-    docker0_mask: /24
-  kubminion4:
-    type: minion
-    ipaddress: 192.168.10.65
-    docker0_bip: 10.10.40.1
-    docker0_mask: /24
-  kubmasta:
+  k8stest1:
     type: master
-    ipaddress: 10.20.30.61
-    docker0_bip: 10.10.90.1
-    docker0_mask: /24
+    ipaddress: 192.168.127.100
+    docker0_bip: 172.10.10.1
+    docker0_mask: /27
     portal_net: 10.100.0.0/16
+  k8stest2:
+    type: minion
+    ipaddress: 192.168.127.101
+    docker0_bip: 172.10.10.33
+    docker0_mask: /27
+  k8stest3:
+    type: minion
+    ipaddress: 192.168.127.102
+    docker0_bip: 172.10.10.65
+    docker0_mask: /27
 kube_pods:
   skydns:
     portalip: 10.0.0.10
