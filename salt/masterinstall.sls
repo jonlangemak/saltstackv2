@@ -13,12 +13,43 @@
     - dir_mode: 755
     - file_mode: 755
 
-/etc/kubernetes/manifests/master-services.yaml:
+/etc/kubernetes/manifests/apiserver.yaml:
   file.managed:
-    - source: salt://manifests/master-services.yaml
+    - source: salt://manifests/apiserver.yaml
+    - user: root
+    - template: jinja
+    - group: root
+    - mode: 755
+
+/etc/kubernetes/manifests/controller.yaml:
+  file.managed:
+    - source: salt://manifests/controller.yaml
     - user: root
     - group: root
     - mode: 755
+
+/etc/kubernetes/manifests/scheduler.yaml:
+  file.managed:
+    - source: salt://manifests/scheduler.yaml
+    - user: root
+    - group: root
+    - mode: 755
+
+touch /var/log/etcd.log:
+  cmd.run:
+    - creates: /var/log/etcd.log
+
+
+
+/var/etcd:
+  file.directory:
+    - user: root
+    - group: root
+    - dir_mode: 700
+    - recurse:
+      - user
+      - group
+      - mode
 
 /etc/kubernetes/manifests/etcd.yaml:
   file.managed:
@@ -39,8 +70,7 @@
 /opt/kubernetes/kubectl:
   file:
     - managed
-    - source: http://storage.googleapis.com/kubernetes-release/release/v0.18.2/bin/linux/amd64/kubectl
-    - source_hash: md5=e658537f2c033b472f5e7ac8b239c2b1
+    - source: salt://kubebinaries/kubectl
     - user: root
     - group: root
     - mode: 755
@@ -68,12 +98,20 @@ kube-kubelet:
   service:
     - running
     - enable: true
-    - watch:
-      - file: /etc/kubernetes/manifests/*
 
 #Make symlink for kubectl
 /usr/local/bin/kubectl:
   file.symlink:
     - target: /opt/kubernetes/kubectl
+
+#Copy down example application (guestbook)
+/etc/kubernetes/examples:
+  file.recurse:
+    - source: salt://manifests/examples
+    - user: root
+    - group: root
+    - template: jinja
+    - dir_mode: 2775
+    - file_mode: 775
 
 

@@ -1,51 +1,81 @@
-apiVersion: v1beta3
+{% set master = [] -%}
+{% for node in salt['pillar.get']('kube_nodes', {}) -%} 
+    {% do master.append(salt['pillar.get']('kube_nodes:' ~ node ~ ':ipaddress')) if salt['pillar.get']('kube_nodes:' ~ node ~ ':type') in "master" -%}
+{% endfor %}
+apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: kube-dns-v3
-  namespace: default
+  name: kube-dns-v10
+  namespace: kube-system
   labels:
-    k8s-app: kube-dns-v3
+    k8s-app: kube-dns
+    version: v10
     kubernetes.io/cluster-service: "true"
 spec:
   replicas: 1
   selector:
     k8s-app: kube-dns
-    version: v3
+    version: v10
   template:
     metadata:
       labels:
         k8s-app: kube-dns
-        version: v3
+        version: v10
         kubernetes.io/cluster-service: "true"
     spec:
       containers:
       - name: etcd
-        image: gcr.io/google_containers/etcd:2.0.9
+        image: gcr.io/google_containers/etcd-amd64:2.2.1
+        resources:
+          # keep request = limit to keep this container in guaranteed class
+          limits:
+            cpu: 100m
+            memory: 50Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
         command:
         - /usr/local/bin/etcd
+        - -data-dir
+        - /var/etcd/data
         - -listen-client-urls
         - http://127.0.0.1:2379,http://127.0.0.1:4001
         - -advertise-client-urls
         - http://127.0.0.1:2379,http://127.0.0.1:4001
         - -initial-cluster-token
         - skydns-etcd
+        volumeMounts:
+        - name: etcd-storage
+          mountPath: /var/etcd/data
       - name: kube2sky
-        image: gcr.io/google_containers/kube2sky:1.9
+        image: gcr.io/google_containers/kube2sky:1.12
+        resources:
+          # keep request = limit to keep this container in guaranteed class
+          limits:
+            cpu: 100m
+            memory: 50Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
         args:
         # command = "/kube2sky"
-        - -domain={{ salt['pillar.get']('kube_pods:skydns:dnsname') }}
-        - -kubecfg_file=/etc/dns_token/kubeconfig
-        - -kube_master_url=http://10.20.30.61:8080
-        volumeMounts:
-        - mountPath: /etc/dns_token
-          name: dns-token
-          readOnly: true
+        - --domain={{ salt['pillar.get']('kube_pods:skydns:dnsname') }}
+        - --kube_master_url=http://{{ master | join(',') }}:8080
       - name: skydns
-        image: gcr.io/google_containers/skydns:2015-03-11-001
+        image: gcr.io/google_containers/skydns:2015-10-13-8c72f8c
+        resources:
+          # keep request = limit to keep this container in guaranteed class
+          limits:
+            cpu: 100m
+            memory: 50Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
         args:
         # command = "/skydns"
-        - -machines=http://localhost:4001
+        - -machines=http://127.0.0.1:4001
         - -addr=0.0.0.0:53
+        - -ns-rotate=false
         - -domain={{ salt['pillar.get']('kube_pods:skydns:dnsname') }}.
         ports:
         - containerPort: 53
@@ -55,15 +85,36 @@ spec:
           name: dns-tcp
           protocol: TCP
         livenessProbe:
-          exec:
-            command:
-            - /bin/sh
-            - -c
-            - nslookup kubernetes.default.{{ salt['pillar.get']('kube_pods:skydns:dnsname') }} localhost >/dev/null
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
           initialDelaySeconds: 30
           timeoutSeconds: 5
-      dnsPolicy: Default  # Don't use cluster DNS.
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 1
+          timeoutSeconds: 5
+      - name: healthz
+        image: gcr.io/google_containers/exechealthz:1.0
+        resources:
+          # keep request = limit to keep this container in guaranteed class
+          limits:
+            cpu: 10m
+            memory: 20Mi
+          requests:
+            cpu: 10m
+            memory: 20Mi
+        args:
+        - -cmd=nslookup kubernetes.default.svc.{{ salt['pillar.get']('kube_pods:skydns:dnsname') }} 127.0.0.1 >/dev/null
+        - -port=8080
+        ports:
+        - containerPort: 8080
+          protocol: TCP
       volumes:
-      - name: dns-token
-        secret:
-          secretName: token-system-dns
+      - name: etcd-storage
+        emptyDir: {}
+      dnsPolicy: Default  # Don't use cluster DNS.

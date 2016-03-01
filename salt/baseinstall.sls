@@ -25,21 +25,13 @@ net-tools:
 wget:
   pkg.installed
 
-#{% if grains.ip_interfaces.docker0 is defined and salt['pillar.get']('kube_nodes:' ~ grains['host'] ~ ':docker0_bip') in salt['grains.get']('ip_interfaces:docker0') %}
-#Do nothing
+permissive:
+  selinux.mode
 
-#{% elif grains.ip_interfaces.docker0 is not defined %}
-#Do nothing
-
-#{% else %}
-#Delete the Docker bridge
-#disable-docker0:
-#  cmd.run:
-#    - name: ifconfig docker0 down
-#delete-docker0:
-#  cmd.run:
-#    - name: brctl delbr docker0
-#{% endif %}
+/etc/selinux/config:
+  file.replace:
+    - pattern: (permissive|enforcing)$
+    - repl: disabled
 
 #Pull down docker config file
 /etc/sysconfig/docker:
@@ -71,13 +63,15 @@ docker-engine:
     - group: root
     - mode: 755
 
+{% if grains.ip_interfaces.docker0 is defined and salt['pillar.get']('kube_nodes:' ~ grains['host'] ~ ':docker0_bip') in salt['grains.get']('ip_interfaces:docker0') %}
+#Do nothing
+
+{% else %}
 dockerrestart:
   cmd:
     - run
     - name: systemctl restart docker
-
-permissive:
-  selinux.mode
+{% endif %}
 
 device-mapper:
   pkg.latest

@@ -1,3 +1,5 @@
+cluster_info:
+  domainname: interubernet.local
 kube_nodes:
   k8stest1:
     type: master

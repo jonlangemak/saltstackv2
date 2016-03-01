@@ -11,12 +11,13 @@ Wants=docker.service
 ExecStart=/opt/kubernetes/kubelet \
 --address={{ salt['pillar.get']('kube_nodes:' ~ grains['host'] ~ ':ipaddress') }} \
 --port=10250 \
---hostname_override={{ salt['grains.get']('host') }} \
---api_servers={{ master | join(',') }}:8080 \
+--allow-privileged=true \
+--hostname_override={{ salt['grains.get']('host') }}.{{ salt['pillar.get']('cluster_info:domainname') }} \
 --config=/etc/kubernetes/manifests \
 --cluster_dns={{ salt['pillar.get']('kube_pods:skydns:portalip') }} \
 --cluster_domain={{ salt['pillar.get']('kube_pods:skydns:dnsname') }} \
 --config=/etc/kubernetes/manifests \
+--api_servers=http://{{ master | join(',') }}:8080 \
 {% if salt['pillar.get']('kube_nodes:' ~grains['host'] ~':type') in "minion" -%}
 --register-node=true \
 {% else -%}
