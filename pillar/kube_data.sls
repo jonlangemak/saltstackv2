@@ -17,6 +17,11 @@ kube_nodes:
     ipaddress: 192.168.127.102
     docker0_bip: 172.10.10.65
     docker0_mask: /27
+  k8stest4:
+    type: minion
+    ipaddress: 192.168.127.103
+    docker0_bip: 172.10.10.97
+    docker0_mask: /27
 kube_pods:
   skydns:
     portalip: 10.0.0.10
