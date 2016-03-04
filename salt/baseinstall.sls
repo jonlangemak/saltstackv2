@@ -25,8 +25,10 @@ net-tools:
 wget:
   pkg.installed
 
-permissive:
-  selinux.mode
+selinux_permissive:
+  cmd:
+    - run
+    - name: setenforce 0
 
 /etc/selinux/config:
   file.replace:

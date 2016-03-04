@@ -13,6 +13,42 @@
     - dir_mode: 755
     - file_mode: 755
 
+#Setup and copy down the certificates
+/etc/kubernetes/ssl:
+  file.directory:
+    - user: root
+    - group: root
+    - dir_mode: 755
+    - file_mode: 755
+
+/etc/kubernetes/ssl/kubecfg.crt:
+  file.managed:
+    - source: salt://ssl/kubecfg.crt
+    - user: root
+    - group: root
+    - mode: 755
+
+/etc/kubernetes/ssl/kubecfg.key:
+  file.managed:
+    - source: salt://ssl/kubecfg.key
+    - user: root
+    - group: root
+    - mode: 755
+
+/etc/kubernetes/ssl/ca.crt:
+  file.managed:
+    - source: salt://ssl/ca.crt
+    - user: root
+    - group: root
+    - mode: 755
+
+/etc/kubernetes/worker-kubeconfig.yaml:
+  file.managed:
+    - source: salt://configfiles/worker-kubeconfig.yaml
+    - user: root
+    - group: root
+    - mode: 755
+
 #Setup and copy down the manifests
 /etc/kubernetes/manifests:
   file.directory:

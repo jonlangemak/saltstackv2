@@ -11,7 +11,8 @@ Wants=docker.service
 
 [Service]
 ExecStart=/opt/kubernetes/kube-proxy \
---master={{ master | join(',') }}:8080 \
+--master=https://{{ master | join(',') }} \
+--kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
 --logtostderr=true
 Restart=on-failure
 RestartSec=5

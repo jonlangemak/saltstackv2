@@ -35,6 +35,35 @@
     - group: root
     - mode: 755
 
+#Setup the SSL directory
+/etc/kubernetes/ssl:
+  file.directory:
+    - user: root
+    - group: root
+    - dir_mode: 755
+    - file_mode: 755
+
+/etc/kubernetes/ssl/server.cert:
+  file.managed:
+    - source: salt://ssl/server.cert
+    - user: root
+    - group: root
+    - mode: 755
+
+/etc/kubernetes/ssl/server.key:
+  file.managed:
+    - source: salt://ssl/server.key
+    - user: root
+    - group: root
+    - mode: 755
+
+/etc/kubernetes/ssl/ca.crt:
+  file.managed:
+    - source: salt://ssl/ca.crt
+    - user: root
+    - group: root
+    - mode: 755
+
 touch /var/log/etcd.log:
   cmd.run:
     - creates: /var/log/etcd.log

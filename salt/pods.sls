@@ -1,33 +1,26 @@
-#Install SkyDNS Pod
-/root/skydns:
+#Create pods directory
+/etc/kubernetes/pods:
   file.directory:
     - user: root
     - group: root
     - dir_mode: 755
     - file_mode: 755
 
-/root/skydns/skydns-svc.yaml:
-  file:
-    - managed
-    - source: salt://pods/skydns/skydns-svc.yaml
-    - template: jinja
+#System related
+/etc/kubernetes/pods/system:
+  file.directory:
+    - user: root
+    - group: root
+    - dir_mode: 755
+    - file_mode: 755
+
+/etc/kubernetes/pods/system/kube-system-ns.yaml:
+  file.managed:
+    - source: salt://pods/system/kube-system-ns.yaml
     - user: root
     - group: root
     - mode: 755
 
-/root/skydns/skydns-rc.yaml:
-  file:
-    - managed
-    - source: salt://pods/skydns/skydns-rc.yaml
-    - template: jinja
-    - user: root
-    - group: root
-    - mode: 755
-
-skydns-service:
+kube-system-ns:
   cmd.run:
-    - name: kubectl create -f /root/skydns/skydns-svc.yaml
-
-skydns-rc:
-  cmd.run:
-    - name: kubectl create -f /root/skydns/skydns-rc.yaml
+    - name: kubectl create -f /etc/kubernetes/pods/system/kube-system-ns.yaml

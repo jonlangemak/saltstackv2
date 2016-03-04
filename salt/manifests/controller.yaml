@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: Pod
 metadata:
@@ -12,6 +13,8 @@ spec:
     - /hyperkube
     - controller-manager
     - --master=http://127.0.0.1:8080
+    - --root-ca-file=/etc/kubernetes/ssl/ca.crt
+    - --service-account-private-key-file=/etc/kubernetes/ssl/server.key
     livenessProbe:
       httpGet:
         host: 127.0.0.1

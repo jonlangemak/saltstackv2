@@ -17,11 +17,15 @@ ExecStart=/opt/kubernetes/kubelet \
 --cluster_dns={{ salt['pillar.get']('kube_pods:skydns:portalip') }} \
 --cluster_domain={{ salt['pillar.get']('kube_pods:skydns:dnsname') }} \
 --config=/etc/kubernetes/manifests \
---api_servers=http://{{ master | join(',') }}:8080 \
 {% if salt['pillar.get']('kube_nodes:' ~grains['host'] ~':type') in "minion" -%}
 --register-node=true \
+--api_servers=https://{{ master | join(',') }} \
+--kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
+--tls-cert-file=/etc/kubernetes/ssl/kubecfg.crt \
+--tls-private-key-file=/etc/kubernetes/ssl/kubecfg.key
 {% else -%}
 --register-node=false \
+--api_servers=https//{{ master | join(',') }}:8080 \
 {% endif -%}
 --logtostderr=true
 Restart=on-failure
