@@ -1,0 +1,3 @@
+{% for token in salt['pillar.get']('auth_tokens').iteritems() -%} 
+    {{ token[0] }},{{ token[1].username }},{{ token[1].uid }}
+{% endfor %}

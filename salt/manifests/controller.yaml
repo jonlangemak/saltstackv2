@@ -8,13 +8,16 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-controller-manager
-    image: gcr.io/google_containers/hyperkube:v1.1.7
+    image: gcr.io/google_containers/hyperkube:{{ pillar['cluster_info']['hyperkube_version'] }}
     command:
     - /hyperkube
     - controller-manager
-    - --master=http://127.0.0.1:8080
+    - --master=http://127.0.0.1:{{ salt['pillar.get']('cluster_info:api_insecure_port') }}
+    {% if salt['pillar.get']('cluster_info:com_protocol') == "https" -%}
     - --root-ca-file=/etc/kubernetes/ssl/ca.crt
     - --service-account-private-key-file=/etc/kubernetes/ssl/server.key
+    {% else -%}
+    {% endif -%}
     livenessProbe:
       httpGet:
         host: 127.0.0.1

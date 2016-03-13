@@ -13,6 +13,7 @@
     - dir_mode: 755
     - file_mode: 755
 
+{% if salt['pillar.get']('cluster_info:com_protocol') == "https" -%}
 #Setup and copy down the certificates
 /etc/kubernetes/ssl:
   file.directory:
@@ -48,6 +49,7 @@
     - user: root
     - group: root
     - mode: 755
+{% endif -%}
 
 #Setup and copy down the manifests
 /etc/kubernetes/manifests:

@@ -1,5 +1,24 @@
 cluster_info:
   domainname: interubernet.local
+  com_protocol: https
+  api_secure_port: 6443
+  api_insecure_port: 8080
+  hyperkube_version: v1.1.7
+kube_pods:
+  skydns:
+    portalip: 10.0.0.10
+    dnsname: kubdomain.local
+auth_logins:
+  jonlangemak:
+    uid: 1
+    password: jonpass
+  admin:
+    uid: 2
+    password: adminpass
+auth_tokens:
+  tokenofthejon:
+    uid: 1
+    username: jontoken
 kube_nodes:
   k8stest1:
     type: master
@@ -22,7 +41,4 @@ kube_nodes:
     ipaddress: 192.168.127.103
     docker0_bip: 172.10.10.97
     docker0_mask: /27
-kube_pods:
-  skydns:
-    portalip: 10.0.0.10
-    dnsname: kubdomain.local
+

@@ -11,8 +11,12 @@ Wants=docker.service
 
 [Service]
 ExecStart=/opt/kubernetes/kube-proxy \
---master=https://{{ master | join(',') }} \
+{% if salt['pillar.get']('cluster_info:com_protocol') == "https" -%}
+--master=https://{{ master | join(',') }}:{{ salt['pillar.get']('cluster_info:api_secure_port') }} \
 --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
+{% else -%}
+--master=http://{{ master | join(',') }}:{{ salt['pillar.get']('cluster_info:api_insecure_port') }} \
+{% endif -%}
 --logtostderr=true
 Restart=on-failure
 RestartSec=5

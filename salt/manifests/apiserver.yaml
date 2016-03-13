@@ -8,22 +8,27 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-apiserver
-    image: gcr.io/google_containers/hyperkube:v1.1.7
+    image: gcr.io/google_containers/hyperkube:{{ pillar['cluster_info']['hyperkube_version'] }}
     command:
     - /hyperkube
     - apiserver
     - --bind-address=0.0.0.0
+    - --basic-auth-file=/etc/kubernetes/basicauth.csv
+    - --token-auth-file=/etc/kubernetes/tokenauth.csv
     - --etcd_servers=http://127.0.0.1:4001
     - --allow-privileged=true
     - --service-cluster-ip-range=10.0.0.1/24
+    - --insecure-bind-address=0.0.0.0
+    - --insecure-port={{ salt['pillar.get']('cluster_info:api_insecure_port') }}
+    - --advertise-address={{ salt['pillar.get']('kube_nodes:' ~ grains['host'] ~ ':ipaddress') }}
+    {% if salt['pillar.get']('cluster_info:com_protocol') == "https" -%}
     - --client-ca-file=/etc/kubernetes/ssl/ca.crt
     - --tls-cert-file=/etc/kubernetes/ssl/server.cert
     - --tls-private-key-file=/etc/kubernetes/ssl/server.key
-    - --secure_port=443
-    - --insecure-bind-address=0.0.0.0
-    - --insecure-port=8080
-    - --advertise-address={{ salt['pillar.get']('kube_nodes:' ~ grains['host'] ~ ':ipaddress') }}
-    - --admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota 
+    - --secure_port={{ salt['pillar.get']('cluster_info:api_secure_port') }}
+    - --admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
+    {% else -%}
+    {% endif -%}
     ports:
     - containerPort: 443
       hostPort: 443
@@ -38,6 +43,9 @@ spec:
     - mountPath: /etc/ssl/certs
       name: ssl-certs-host
       readOnly: true
+    - mountPath: /etc/kubernetes
+      name: kubernetes-configfiles
+      readOnly: true
   volumes:
   - hostPath:
       path: /etc/kubernetes/ssl
@@ -45,3 +53,6 @@ spec:
   - hostPath:
       path: /usr/share/ca-certificates
     name: ssl-certs-host
+  - hostPath:
+      path: /etc/kubernetes
+    name: kubernetes-configfiles

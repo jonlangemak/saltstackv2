@@ -25,15 +25,34 @@
   file.managed:
     - source: salt://manifests/controller.yaml
     - user: root
+    - template: jinja
     - group: root
     - mode: 755
 
 /etc/kubernetes/manifests/scheduler.yaml:
   file.managed:
     - source: salt://manifests/scheduler.yaml
+    - template: jinja
     - user: root
     - group: root
     - mode: 755
+
+#{% if salt['pillar.get']('cluster_info:com_protocol') == "https" %}
+##Generate certs
+#{% set master = [] -%}
+#{% for node in salt['pillar.get']('kube_nodes', {}) -%}
+#    {% do master.append(salt['pillar.get']('kube_nodes:' ~ node ~ ':ipaddress')) if salt['pillar.get']('kube_nodes:' ~ node ~ ':type') in "master" -%}
+#{% endfor %}
+
+#kube-cert:
+#  group:
+#    - present
+
+#gencerts:
+#  cmd:
+#    - run
+#    - name:./make-ca-cert.sh {{ master }} IP:{{ master }},IP:10.0.0.1,DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local
+ 
 
 #Setup the SSL directory
 /etc/kubernetes/ssl:
@@ -63,6 +82,7 @@
     - user: root
     - group: root
     - mode: 755
+{% endif %}
 
 touch /var/log/etcd.log:
   cmd.run:
@@ -143,4 +163,21 @@ kube-kubelet:
     - dir_mode: 2775
     - file_mode: 775
 
+/etc/kubernetes/basicauth.csv:
+  file:
+    - managed
+    - source: salt://configfiles/basicauth.csv
+    - template: jinja
+    - user: root
+    - group: root
+    - mode: 755
+
+/etc/kubernetes/tokenauth.csv:
+  file:
+    - managed
+    - source: salt://configfiles/tokenauth.csv
+    - template: jinja
+    - user: root
+    - group: root
+    - mode: 755
 

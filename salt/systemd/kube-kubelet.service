@@ -19,13 +19,16 @@ ExecStart=/opt/kubernetes/kubelet \
 --config=/etc/kubernetes/manifests \
 {% if salt['pillar.get']('kube_nodes:' ~grains['host'] ~':type') in "minion" -%}
 --register-node=true \
---api_servers=https://{{ master | join(',') }} \
+{% if salt['pillar.get']('cluster_info:com_protocol') == "https" -%}
+--api_servers=https://{{ master | join(',') }}:{{ salt['pillar.get']('cluster_info:api_secure_port') }} \
 --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
 --tls-cert-file=/etc/kubernetes/ssl/kubecfg.crt \
 --tls-private-key-file=/etc/kubernetes/ssl/kubecfg.key
 {% else -%}
+--api_servers=http://{{ master | join(',') }}:{{ salt['pillar.get']('cluster_info:api_insecure_port') }} \
+{% endif -%}
+{% else -%}
 --register-node=false \
---api_servers=https//{{ master | join(',') }}:8080 \
 {% endif -%}
 --logtostderr=true
 Restart=on-failure
